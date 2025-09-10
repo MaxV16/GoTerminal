@@ -16,6 +16,7 @@
 | `clear`          | Clear command history            |
 | `echo <message>` | Echo back the provided message   |
 
+
 ### ➕ Arithmetic Operations
 
 | Command                  | Description                           |
@@ -34,6 +35,8 @@
 | `cat <filename>`              | Display contents of a file         |
 | `write <filename> <content>`  | Write content to a file            |
 | `append <filename> <content>` | Append content to an existing file |
+| `save`                        | Save to a file with options        |
+
 
 ### 🧩 Pipe Support
 
@@ -90,6 +93,6 @@ go run main.go
 ## 🧠 Future Improvements
 
 * 🔮 AI Command Suggestions / Prompts
-* 🌐 Frontend with database integration
+* 🌐 Frontend with database integration (coming out soon!)
 * ☁️ Host online for remote terminal access
 * 📂 `.gitignore` `.env` and other sensitive files (for security)

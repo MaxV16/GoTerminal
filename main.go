@@ -3,11 +3,12 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/chzyer/readline"
-	"github.com/fatih/color"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/chzyer/readline"
+	"github.com/fatih/color"
 )
 
 type command struct {
@@ -18,6 +19,7 @@ type command struct {
 
 var commands = make(map[string]command)
 var history []string
+var arithmeticHistory []string // New global variable to store arithmetic operations
 
 type Config struct {
 	Prompt      string
@@ -58,6 +60,7 @@ func main() {
 	registerCommand("config", "Configure terminal settings", cmdConfig)
 	registerCommand("set", "Set a configuration value", cmdSet)
 	registerCommand("theme", "Change color theme", cmdTheme)
+	registerCommand("save", "Save history or arithmetic operations", cmdSave) // Register the new save command
 	// Set up readline with command completion
 	completer := readline.NewPrefixCompleter(
 		readline.PcItem("help"),
@@ -165,6 +168,7 @@ func cmdAdd(args []string) {
 		return
 	}
 	result := num1 + num2
+	arithmeticHistory = append(arithmeticHistory, fmt.Sprintf("%f + %f = %f", num1, num2, result)) // Store operation
 	color.Blue("Result: %f", result)
 }
 
@@ -181,6 +185,7 @@ func cmdMultiply(args []string) {
 		return
 	}
 	result := num1 * num2
+	arithmeticHistory = append(arithmeticHistory, fmt.Sprintf("%f * %f = %f", num1, num2, result)) // Store operation
 	color.Blue("Result: %f", result)
 }
 func cmdSubtract(args []string) {
@@ -196,6 +201,7 @@ func cmdSubtract(args []string) {
 		return
 	}
 	result := num1 - num2
+	arithmeticHistory = append(arithmeticHistory, fmt.Sprintf("%f - %f = %f", num1, num2, result)) // Store operation
 	color.Blue("Result: %f", result)
 }
 
@@ -226,6 +232,7 @@ func cmdDivision(args []string) {
 		return
 	}
 	result := num1 / num2
+	arithmeticHistory = append(arithmeticHistory, fmt.Sprintf("%f / %f = %f", num1, num2, result)) // Store operation
 	color.Blue("Result: %f", result)
 }
 func cmdModulus(args []string) {
@@ -245,6 +252,7 @@ func cmdModulus(args []string) {
 		return
 	}
 	result := int(num1) % int(num2)
+	arithmeticHistory = append(arithmeticHistory, fmt.Sprintf("%d %% %d = %d", int(num1), int(num2), result)) // Store operation
 	color.Blue("Result: %d", result)
 }
 
@@ -443,4 +451,72 @@ func cmdTheme(args []string) {
 
 	config.Theme = theme
 	color.Green("Theme set to %s", theme)
+}
+
+// New save command handler
+func cmdSave(args []string) {
+	if len(args) == 0 {
+		color.Green("Save options:")
+		color.Yellow("  save history - Save command history to a file")
+		color.Yellow("  save arithmetic - Save past arithmetic operations to a file")
+		return
+	}
+
+	switch args[0] { //
+	case "history":
+		saveHistoryToFile()
+	case "arithmetic":
+		saveArithmeticToFile()
+	default:
+		color.Red("Unknown save option: %s", args[0])
+		color.Yellow("Please choose 'history' or 'arithmetic'.")
+	}
+}
+
+func saveHistoryToFile() {
+	if len(history) == 0 {
+		color.Yellow("No command history to save.")
+		return
+	}
+
+	filename := "command_history.txt"
+	file, err := os.Create(filename)
+	if err != nil {
+		color.Red("Error creating file %s: %v", filename, err)
+		return
+	}
+	defer file.Close()
+
+	for _, cmd := range history {
+		_, err := file.WriteString(cmd + "\n")
+		if err != nil {
+			color.Red("Error writing to file %s: %v", filename, err)
+			return
+		}
+	}
+	color.Green("Command history saved to %s", filename)
+}
+
+func saveArithmeticToFile() {
+	if len(arithmeticHistory) == 0 {
+		color.Yellow("No arithmetic operations to save.")
+		return
+	}
+
+	filename := "arithmetic_operations.txt"
+	file, err := os.Create(filename)
+	if err != nil {
+		color.Red("Error creating file %s: %v", filename, err)
+		return
+	}
+	defer file.Close()
+
+	for _, op := range arithmeticHistory {
+		_, err := file.WriteString(op + "\n")
+		if err != nil {
+			color.Red("Error writing to file %s: %v", filename, err)
+			return
+		}
+	}
+	color.Green("Arithmetic operations saved to %s", filename)
 }
