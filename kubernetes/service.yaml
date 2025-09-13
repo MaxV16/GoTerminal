@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: goterminal-service
+  labels:
+    app: goterminal
+spec:
+  selector:
+    app: goterminal
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080 # Assuming a future web server on port 8080
+  type: ClusterIP

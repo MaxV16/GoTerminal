@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goterminal-deployment
+  labels:
+    app: goterminal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goterminal
+  template:
+    metadata:
+      labels:
+        app: goterminal
+    spec:
+      containers:
+      - name: goterminal
+        image: goterminal-app:latest # This image will be built locally
+        imagePullPolicy: IfNotPresent # Use IfNotPresent for local images, Always for remote
+        command: ["./goTerminal"]
+        stdin: true
+        tty: true
+        # Definte ports here when it is a web server/application..
+        # ports:
+        # - containerPort: 8080
