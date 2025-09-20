@@ -166,4 +166,27 @@ go run main.go
 * 🔮 AI Command Suggestions / Prompts
 * 🌐 Frontend with database integration (coming out soon!)
 * ☁️ Host online for remote terminal access
-* 📂 `.gitignore` `.env` and other sensitive files (for security)
+
+
+graph TD
+    A[Start Project] --> B(Define Core Features & User Flows)
+    B --> C(Design Frontend Mockups/Wireframes)
+    C --> D(Define API Contracts)
+    D --> E{Parallel Development}
+
+    E -- Frontend Track --> F(Develop Frontend with Mock Data)
+    F --> G(Implement Frontend Unit Tests)
+    G --> H(Frontend CI: Lint, Build, Unit Tests)
+    H --> I(Frontend CD: Deploy to Preview/Staging)
+
+    E -- Backend Track --> J(Develop Backend: Database & API)
+    J --> K(Implement Backend Unit Tests)
+    K --> L(Backend CI: Lint, Build, Unit/Integration/API Tests)
+    L --> M(Backend CD: Deploy to Staging)
+
+    I & M --> N(Integrate Frontend & Backend in Staging)
+    N --> O(End-to-End Testing)
+    O --> P(CI/CD: Automated E2E Tests)
+    P --> Q(CD: Deploy to Production)
+    Q --> R[Deploy & Iterate]
+

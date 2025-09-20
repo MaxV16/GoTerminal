@@ -61,6 +61,7 @@ func main() {
 	registerCommand("set", "Set a configuration value", cmdSet)
 	registerCommand("theme", "Change color theme", cmdTheme)
 	registerCommand("save", "Save history or arithmetic operations", cmdSave) // Register the new save command
+
 	// Set up readline with command completion
 	completer := readline.NewPrefixCompleter(
 		readline.PcItem("help"),
@@ -259,6 +260,19 @@ func cmdModulus(args []string) {
 // Pipe command handler
 func cmdPipe(args []string) {
 	if len(args) < 2 {
+		color.Red("Usage: pipe <command1> | <command2> [| <command3> ...]")
+		return
+	}
+
+	// Check if a pipe symbol exists
+	hasPipe := false
+	for _, arg := range args {
+		if arg == "|" {
+			hasPipe = true
+			break
+		}
+	}
+	if !hasPipe {
 		color.Red("Usage: pipe <command1> | <command2> [| <command3> ...]")
 		return
 	}
