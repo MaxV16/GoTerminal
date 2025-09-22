@@ -1,0 +1,49 @@
+run:
+  timeout: 5m
+
+linters-settings:
+  errcheck:
+    checks:
+      - blank
+  goimports:
+    local-prefixes: github.com/your-username/GoTerminal # Replace with your actual module path
+  golint:
+    min-confidence: 0
+  gofmt:
+    simplify: true
+  gocyclo:
+    min-complexity: 15
+  maligned:
+    # print struct fields with unaligned pointers
+    suggest-new: true
+  misspell:
+    locale: US
+  unparam:
+    # find unused parameters
+    check-exported: false
+  whitespace:
+    # check for leading/trailing whitespace
+    multi-line: true
+
+linters:
+  enable-all: true
+  disable:
+    - depguard
+    - exhaustivestruct
+    - funlen
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - godox
+    - goerr113
+    - gomnd
+    - lll
+    - nakedret
+    - prealloc
+    - testpackage
+    - wsl
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0

@@ -39,6 +39,11 @@
 | `save history`                | Save command history to `command_history.txt` |
 | `save arithmetic`             | Save arithmetic operations to `arithmetic_operations.txt` |
 
+### 🔒 Permissions and File Access
+*   **Integrated Permission Checks**: Commands interacting with the file system (`cat`, `write`, `append`, `save history`, `save arithmetic`) now include robust permission checks.
+*   **Access Control**: The terminal verifies read and write permissions before executing file operations, preventing unauthorized access and modifications.
+*   **Error Handling**: Clear error messages are provided when file access is denied or files are not found.
+
 
 ### 🧩 Pipe Support
 
@@ -71,6 +76,7 @@ Powered by [`chzyer/readline`](https://github.com/chzyer/readline):
 
 ---
 
+
 ## 🛠 Installation & Usage
 
 ### Prerequisites
@@ -91,6 +97,16 @@ go get github.com/fatih/color
 ```bash
 go run main.go
 ```
+
+### Run Unit Tests
+
+To run the unit tests for GoTerminal, navigate to the project's root directory and execute the following command:
+
+```bash
+go test ./...
+```
+
+This command will discover and run all tests in the current module.
 
 ### Run the Application (Docker)
 
@@ -160,33 +176,35 @@ go run main.go
 
 ---
 
-## 🧠 Future Improvements
-* Docker + Kubernetes volumes for persistence
-* load balancing
-* 🔮 AI Command Suggestions / Prompts
-* 🌐 Frontend with database integration (coming out soon!)
-* ☁️ Host online for remote terminal access
 
 
-graph TD
-    A[Start Project] --> B(Define Core Features & User Flows)
-    B --> C(Design Frontend Mockups/Wireframes)
-    C --> D(Define API Contracts)
-    D --> E{Parallel Development}
+## 🤝 Contributing
 
-    E -- Frontend Track --> F(Develop Frontend with Mock Data)
-    F --> G(Implement Frontend Unit Tests)
-    G --> H(Frontend CI: Lint, Build, Unit Tests)
-    H --> I(Frontend CD: Deploy to Preview/Staging)
+If you have suggestions for improvements, new features, or bug fixes, please follow these steps:
 
-    E -- Backend Track --> J(Develop Backend: Database & API)
-    J --> K(Implement Backend Unit Tests)
-    K --> L(Backend CI: Lint, Build, Unit/Integration/API Tests)
-    L --> M(Backend CD: Deploy to Staging)
-
-    I & M --> N(Integrate Frontend & Backend in Staging)
-    N --> O(End-to-End Testing)
-    O --> P(CI/CD: Automated E2E Tests)
-    P --> Q(CD: Deploy to Production)
-    Q --> R[Deploy & Iterate]
+1.  **Fork the Repository:** Start by forking the GoTerminal repository to your GitHub account.
+2.  **Clone Your Fork:** Clone your forked repository to your local machine:
+    ```bash
+    git clone https://github.com/MaxV16/GoTerminal.git
+    cd GoTerminal
+    ```
+3.  **Create a New Branch:** Create a new branch for your feature or bug fix:
+    ```bash
+    git checkout -b feature/your-feature-name
+    # or
+    git checkout -b bugfix/issue-description
+    ```
+4.  **Make Your Changes:** Implement your changes, ensuring they adhere to the existing code style and conventions.
+5.  **Test Your Changes:** If applicable, add or update tests to cover your modifications. Ensure all existing tests pass.
+6.  **Commit Your Changes:** Commit your changes with a clear and descriptive commit message:
+    ```bash
+    git commit -m "feat: Add new feature"
+    # or
+    git commit -m "fix: Resolve issue with command history"
+    ```
+7.  **Push to Your Fork:** Push your new branch to your forked repository on GitHub:
+    ```bash
+    git push origin feature/your-feature-name
+    ```
+8.  **Open a Pull Request:** Go to the original GoTerminal repository on GitHub and open a new pull request from your forked branch. Provide a detailed description of your changes and why they are necessary.
 

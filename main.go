@@ -5,10 +5,17 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/chzyer/readline"
 	"github.com/fatih/color"
+)
+
+// Define permission constants
+const (
+	ReadPermission  = 1 << iota // 1 (001)
+	WritePermission             // 2 (010)
 )
 
 type command struct {
@@ -346,7 +353,13 @@ func cmdCat(args []string) {
 		return
 	}
 
-	content, err := os.ReadFile(args[0])
+	filename := args[0]
+	if ok, err := checkFilePermissions(filename, ReadPermission); !ok {
+		color.Red("Permission denied: %v", err)
+		return
+	}
+
+	content, err := os.ReadFile(filename)
 	if err != nil {
 		color.Red("Error reading file: %v", err)
 		return
@@ -361,8 +374,14 @@ func cmdWrite(args []string) {
 		return
 	}
 
+	filename := args[0]
+	if ok, err := checkFilePermissions(filename, WritePermission); !ok {
+		color.Red("Permission denied: %v", err)
+		return
+	}
+
 	content := strings.Join(args[1:], " ")
-	err := os.WriteFile(args[0], []byte(content), 0644)
+	err := os.WriteFile(filename, []byte(content), 0644)
 	if err != nil {
 		color.Red("Error writing file: %v", err)
 		return
@@ -377,7 +396,13 @@ func cmdAppend(args []string) {
 		return
 	}
 
-	f, err := os.OpenFile(args[0], os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	filename := args[0]
+	if ok, err := checkFilePermissions(filename, WritePermission); !ok {
+		color.Red("Permission denied: %v", err)
+		return
+	}
+
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		color.Red("Error opening file: %v", err)
 		return
@@ -494,6 +519,10 @@ func saveHistoryToFile() {
 	}
 
 	filename := "command_history.txt"
+	if ok, err := checkFilePermissions(filename, WritePermission); !ok {
+		color.Red("Permission denied: %v", err)
+		return
+	}
 	file, err := os.Create(filename)
 	if err != nil {
 		color.Red("Error creating file %s: %v", filename, err)
@@ -518,6 +547,10 @@ func saveArithmeticToFile() {
 	}
 
 	filename := "arithmetic_operations.txt"
+	if ok, err := checkFilePermissions(filename, WritePermission); !ok {
+		color.Red("Permission denied: %v", err)
+		return
+	}
 	file, err := os.Create(filename)
 	if err != nil {
 		color.Red("Error creating file %s: %v", filename, err)
@@ -533,4 +566,48 @@ func saveArithmeticToFile() {
 		}
 	}
 	color.Green("Arithmetic operations saved to %s", filename)
+}
+
+// checkFilePermissions checks if the current user has the required permissions for a file.
+func checkFilePermissions(filename string, requiredPermissions int) (bool, error) {
+	// Get the absolute path to handle relative paths correctly
+	absPath, err := filepath.Abs(filename)
+	if err != nil {
+		return false, fmt.Errorf("error getting absolute path for %s: %w", filename, err)
+	}
+
+	fileInfo, err := os.Stat(absPath)
+	if os.IsNotExist(err) {
+		// If the file doesn't exist, we assume write permission is allowed for creation,
+		// but read permission is not applicable.
+		if requiredPermissions&WritePermission != 0 {
+			return true, nil // Allow writing to a new file
+		}
+		return false, fmt.Errorf("file not found: %s", filename)
+	} else if err != nil {
+		return false, fmt.Errorf("error stating file %s: %w", filename, err)
+	}
+
+	// Get the file mode
+	mode := fileInfo.Mode()
+
+	// Check read permission
+	if requiredPermissions&ReadPermission != 0 {
+		// For simplicity, we'll check if the owner has read permission.
+		// A more robust solution would involve checking group and other permissions
+		// based on the current user's effective UID/GIDs.
+		if mode&0400 == 0 { // Check if owner read bit is NOT set
+			return false, fmt.Errorf("read access denied for %s", filename)
+		}
+	}
+
+	// Check write permission
+	if requiredPermissions&WritePermission != 0 {
+		// For simplicity, we'll check if the owner has write permission.
+		if mode&0200 == 0 { // Check if owner write bit is NOT set
+			return false, fmt.Errorf("write access denied for %s", filename)
+		}
+	}
+
+	return true, nil
 }

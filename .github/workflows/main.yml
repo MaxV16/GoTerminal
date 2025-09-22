@@ -1,0 +1,46 @@
+name: Go CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+
+    - name: Install golangci-lint
+      run: |
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.1
+
+    - name: Run linters
+      run: |
+        golangci-lint run ./...
+
+    - name: Run tests
+      run: go test -v ./...
+
+    - name: Build application
+      run: go build -o goTerminal .
+
+    - name: Docker build and push to staging
+      if: github.ref == 'refs/heads/main'
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        docker build -t goterminal-app:staging .
+        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        docker tag goterminal-app:staging $DOCKER_USERNAME/goterminal-app:staging
+        docker push $DOCKER_USERNAME/goterminal-app:staging
