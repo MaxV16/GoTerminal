@@ -270,7 +270,7 @@ func TestCmdCat(t *testing.T) {
 	output = captureStdout(func() {
 		cmdCat([]string{"non_existent_file.txt"})
 	})
-	if !strings.Contains(output, "Error reading file:") {
+	if !strings.Contains(output, "Permission denied: file not found:") {
 		t.Errorf("Expected error for non-existent file, got '%s'", output)
 	}
 }
