@@ -21,6 +21,13 @@ spec:
         command: ["./goTerminal"]
         stdin: true
         tty: true
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
         # Definte ports here when it is a web server/application..
-        # ports:
-        # - containerPort: 8080
+        ports:
+        - containerPort: 8080
