@@ -20,4 +20,3 @@ go.work
 .env.local
 *.env
 config.env
-

@@ -76,14 +76,91 @@ Powered by [`chzyer/readline`](https://github.com/chzyer/readline):
 
 ---
 
+## 🚀 CI/CD Workflow
+
+This project uses GitHub Actions for Continuous Integration and Continuous Deployment. The workflow is defined in [`./github/workflows/go-ci.yml`](.github/workflows/go-ci.yml).
+
+### How CI/CD Works
+
+The CI/CD pipeline is configured to build, test, and deploy the `GoTerminal` application based on pushes to specific branches:
+
+*   **`dev_backend` branch:**
+    *   Triggers the `build-and-test` job.
+    *   Builds the Go application and runs unit tests.
+    *   Builds a Docker image and pushes it to Docker Hub with tags: `your-dockerhub-username/goterminal-app:<commit_sha>` and `your-dockerhub-username/goterminal-app:dev_backend`.
+    *   **Note:** There is no automatic deployment to Kubernetes for `dev_backend`. This branch is primarily for development and testing the Docker image build process.
+
+*   **`staging` branch:**
+    *   Triggers the `build-and-test` job, followed by the `deploy-staging` job.
+    *   The `deploy-staging` job sets up Kubernetes context for the staging environment and applies the `kubernetes/deployment.yaml`, `kubernetes/service.yaml`, and `kubernetes/hpa.yaml` configurations, deploying the latest image built from the `staging` branch.
+
+*   **`production` branch:**
+    *   Triggers the `build-and-test` job, followed by the `deploy-production` job.
+    *   The `deploy-production` job sets up Kubernetes context for the production environment and applies the `kubernetes/deployment.yaml`, `kubernetes/service.yaml`, and `kubernetes/hpa.yaml` configurations, deploying the latest image built from the `production` branch.
+
+### How to See CI/CD and Deployment Work
+
+1.  **Push to a Branch:**
+    *   **For `dev_backend`:** Make a change and push to `dev_backend`. Monitor the "Actions" tab on GitHub to see the `build-and-test` job complete and the Docker image pushed. You can then manually pull and run the Docker image or deploy it to a local Kubernetes cluster.
+    *   **For `staging` or `production`:** Make a change and push to `staging` or `production`. Monitor the "Actions" tab on GitHub. After the `build-and-test` job, the respective `deploy-staging` or `deploy-production` job will run, deploying the application to the Kubernetes cluster.
+
+2.  **Verify Deployment in Kubernetes:**
+    After a successful deployment to `staging` or `production`, you can verify the deployment using `kubectl`:
+    ```bash
+    kubectl get deployments
+    kubectl get pods
+    kubectl get services
+    ```
+    Ensure `goterminal-deployment` and `goterminal-service` are listed, and your `goterminal` pod is in a `Running` state with `1/1` ready.
+
+3.  **Access the Web Application (Once Implemented):**
+    Once `GoTerminal` is converted into a web application, you can access it via the Kubernetes service. If your Kubernetes cluster is running locally (e.g., Minikube or Docker Desktop), you can use `minikube service goterminal-service` (for Minikube) or `kubectl port-forward service/goterminal-service 8080:80` (for Docker Desktop) to get the URL or access it locally. For remote clusters, you would typically configure an Ingress controller or a LoadBalancer service to expose the application externally.
+
+## 🔒 Environment Variables and GitHub Secrets
+
+This project utilizes several environment variables and GitHub Secrets for secure and flexible CI/CD operations.
+
+### Required Variables
+
+The following variables need to be configured:
+
+*   **`DOCKER_USERNAME`**: Your Docker Hub username.
+*   **`DOCKER_PASSWORD`**: Your Docker Hub password or a Personal Access Token.
+*   **`KUBE_CONFIG_STAGING`**: Base64 encoded content of your Kubernetes kubeconfig file for the staging environment.
+*   **`KUBE_CONFIG_PROD`**: Base64 encoded content of your Kubernetes kubeconfig file for the production environment.
+*   **`DOCKER_REPO`**: The full path to your Docker repository (e.g., `your-dockerhub-username/goterminal-app`).
+
+### Configuration Steps
+
+1.  **Local Development (`config.env.example`):**
+    For local testing or manual Docker operations, you can create a `.env` file based on `config.env.example` in the root directory of this project.
+    ```bash
+    cp config.env.example .env
+    # Edit .env with your actual values
+    ```
+    **Important:** Never commit your `.env` file to version control.
+
+2.  **GitHub Secrets (for CI/CD):**
+    For the GitHub Actions CI/CD pipeline to function correctly, you must configure these variables as GitHub Secrets in your repository.
+
+    *   Go to your GitHub repository.
+    *   Navigate to `Settings` > `Secrets and variables` > `Actions`.
+    *   Click `New repository secret` and add each of the required variables (`DOCKER_USERNAME`, `DOCKER_PASSWORD`, `KUBE_CONFIG_STAGING`, `KUBE_CONFIG_PROD`, `DOCKER_REPO`) with their respective values.
+
+    **Note on Kubeconfig:** To get the base64 encoded value of your kubeconfig, you can use the following command:
+    ```bash
+    cat ~/.kube/config | base64
+    # On macOS, you might need: cat ~/.kube/config | base64 | tr -d '\n'
+    ```
+    Ensure you use the correct kubeconfig file for your staging and production clusters.
 
 ## 🛠 Installation & Usage
 
 ### Prerequisites
 
-* Go installed (version ≥ 1.16)
-* Docker installed and running
-* `kubectl` installed and configured
+*   Go installed (version ≥ 1.16)
+*   Docker installed and running
+*   `kubectl` installed and configured
 
 ### Install Dependencies
 
